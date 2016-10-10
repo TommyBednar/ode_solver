@@ -70,11 +70,12 @@ def bdf2(f, fx, x0, t0, tf, h):
         x[i+2] = opt.newton(g, x[i+1], dg, tol=1e-6)
     return t, x
 
-# x[n+3] - x[n+2] = 1/12*h*(23*f[n+2] - 48*f[n+1] + 5*f[n])
+# x[n+3] - x[n+2] = 1/12*h*(23*f[n+2] - 16*f[n+1] + 5*f[n])
+
 def ab3(f, fx, x0, t0, tf, h):
     n, t, x = _init(x0, t0, tf, h)
     x[1:2] = trapezoidal(f, fx, x0, t0, t0 + 2*h, h)[1][1:2]
     for i in range(n-2):
-        x[i+3] = x[i+2] + 1/12*h*(23*f(t[i+2], x[i+2]) - 48*f(t[i+1], x[i+1]) + 5*f(t[i], x[i]))
+        x[i+3] = x[i+2] + 1/12*h*(23*f(t[i+2], x[i+2]) - 16*f(t[i+1], x[i+1]) + 5*f(t[i], x[i]))
     return t, x
 
