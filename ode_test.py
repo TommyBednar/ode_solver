@@ -35,28 +35,20 @@ def run_test_problem(test_func, description, integration_params):
         params = x0, t0, tf, h
         t, x = integrator.integrate(method, derivatives, params)
         xe = x_exact(t)
-        print method, test_name, h, np.max(np.abs(xe - x))
-        plt.plot(t, x, label='h = {}'.format(h))
-    plt.plot(t, xe, label='exact')
+        plt.plot(x.real, x.imag, label='h = {}'.format(h))
+    plt.plot(xe.real, xe.imag, label='exact')
     plt.legend()
 
 
 def main():
     x0 = 1
-    t0, tf = 0, 5
+    t0, tf = 0, 10
 
-    for method in ('be', 'cn', 'bdf2', 'ab3'):
-        ks = [-1, -10, -50]
-        hs = [0.5, 0.1, 0.01]
-        for k in ks:
-            test_func = lambda t: np.exp(k*t), partial(f,k), partial(dfdt,k), partial(fx,k)
-            description = method, 'exp({}t)'.format(k)
-            integration_params = hs, x0, t0, tf
-            run_test_problem(test_func, description, integration_params)
-
-        hs = [0.2, 0.1, 0.05, 0.025]
-        test_func = lambda t: np.exp(np.sin(t)), g, dgdt, gx
-        description = method, 'exp(sin(t))'
+    for method in ['midpoint', 'ab3']:
+        k = 6j
+        hs = [0.2, 0.15, 0.1, 0.08]
+        test_func = lambda t: np.exp(k*t), partial(f,k), partial(dfdt,k), partial(fx,k)
+        description = method, 'exp({}t)'.format(k)
         integration_params = hs, x0, t0, tf
         run_test_problem(test_func, description, integration_params)
 

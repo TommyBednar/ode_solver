@@ -6,7 +6,7 @@ import scipy.optimize as opt
 def _init(x0, t0, tf, h):
     n = int((tf-t0)/h)
     t = np.linspace(t0, tf, n+1)
-    x = np.zeros(t.size)
+    x = np.zeros(t.size, dtype=complex)
     x[0] = x0
     return n, t, x
 
@@ -24,6 +24,8 @@ def integrate(method, derivatives, params):
         return bdf2(f, fx, *params)
     elif method == 'ab3':
         return ab3 (f, fx, *params)
+    elif method == 'midpoint':
+        return midpoint(f, fx, *params)
     else:
         raise ValueError('Unrecognized integration method: ' + method)
 
@@ -31,7 +33,7 @@ def integrate(method, derivatives, params):
 def euler(f, x0, t0, tf, h):
     n, t, x = _init(x0, t0, tf, h)
     for i in range(n):
-        x[i+1] = x[i] + h * f(t[i], x[i])
+        x[i+1] = x[i] + h*f(t[i], x[i])
     return t, x
 
 # x[n+1]- x[n]= h*f[n] + 1/2*h^2*f'[n]
@@ -71,7 +73,6 @@ def bdf2(f, fx, x0, t0, tf, h):
     return t, x
 
 # x[n+3] - x[n+2] = 1/12*h*(23*f[n+2] - 16*f[n+1] + 5*f[n])
-
 def ab3(f, fx, x0, t0, tf, h):
     n, t, x = _init(x0, t0, tf, h)
     x[1:3] = trapezoidal(f, fx, x0, t0, t0 + 2*h, h)[1][1:3]
@@ -79,3 +80,10 @@ def ab3(f, fx, x0, t0, tf, h):
         x[i+3] = x[i+2] + h*f(t[i+2],x[i+2])#1/12*h*(23*f(t[i+2], x[i+2]) - 16*f(t[i+1], x[i+1]) + 5*f(t[i], x[i]))
     return t, x
 
+# x[n+2] - x[n] = 2*h*f[n+1]
+def midpoint(f, fx, x0, t0, tf, h):
+    n, t, x = _init(x0, t0, tf, h)
+    x[1] = trapezoidal(f, fx, x0, t0, t0 + h, h)[1][1]
+    for i in range(n-1):
+        x[i+2] = x[i] + 2*h*f(t[i+1], x[i+1])
+    return t, x
